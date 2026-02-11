@@ -3,9 +3,23 @@ const router = express.Router();
 const Transaction = require("../models/Transaction"); 
 
 
-// GET all transactions
+// GET all transactions (optionally filter by date)
 router.get("/", async (req, res) => {
   try {
+        const { date } = req.query;
+
+    if (date) {
+      const start = new Date(date);
+      const end = new Date(date);
+      end.setDate(end.getDate() + 1);
+
+      const transactions = await Transaction.find({
+        date: { $gte: start, $lt: end },
+      });
+
+      return res.json(transactions);
+    }
+    
     const transactions = await Transaction.find();
     res.json(transactions);
   } catch (err) {
