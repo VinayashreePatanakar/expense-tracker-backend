@@ -1,12 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const Transaction = require("../models/Transaction"); 
-
+const Transaction = require("../models/Transaction");
 
 // GET all transactions (optionally filter by date)
 router.get("/", async (req, res) => {
   try {
-        const { date } = req.query;
+    const { date } = req.query;
 
     if (date) {
       const start = new Date(date);
@@ -16,10 +15,9 @@ router.get("/", async (req, res) => {
       const transactions = await Transaction.find({
         date: { $gte: start, $lt: end },
       });
-
       return res.json(transactions);
     }
-    
+
     const transactions = await Transaction.find();
     res.json(transactions);
   } catch (err) {
@@ -29,8 +27,13 @@ router.get("/", async (req, res) => {
 
 // POST a new transaction
 router.post("/", async (req, res) => {
-  const { text, amount } = req.body;
-  const transaction = new Transaction({ text, amount });
+  const { text, amount, date, category } = req.body; // ✅ category included
+  const transaction = new Transaction({
+    text,
+    amount,
+    date,
+    category, // default if not sent
+  });
 
   try {
     const newTransaction = await transaction.save();
@@ -42,7 +45,6 @@ router.post("/", async (req, res) => {
 
 // DELETE transaction by ID
 router.delete("/:id", async (req, res) => {
-  console.log("DELETE request received for ID:", req.params.id);
   try {
     const transaction = await Transaction.findByIdAndDelete(req.params.id);
     if (!transaction) return res.status(404).json({ message: "Transaction not found" });
@@ -55,10 +57,11 @@ router.delete("/:id", async (req, res) => {
 // PUT /api/transactions/:id
 router.put("/:id", async (req, res) => {
   try {
+    const { text, amount, category, date } = req.body; // ✅ include category
     const updatedTransaction = await Transaction.findByIdAndUpdate(
       req.params.id,
-      { text: req.body.text, amount: req.body.amount },
-      { new: true } // return updated document
+      { text, amount, category: category || "General", date: date || new Date() },
+      { new: true }
     );
     if (!updatedTransaction)
       return res.status(404).json({ message: "Transaction not found" });
