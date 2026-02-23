@@ -21,18 +21,21 @@ router.get("/", async (req, res) => {
     const transactions = await Transaction.find();
     res.json(transactions);
   } catch (err) {
+    console.error(err); // <- This will show the real error
     res.status(500).json({ message: err.message });
   }
 });
 
 // POST a new transaction
 router.post("/", async (req, res) => {
-  const { text, amount, date, category } = req.body; // ✅ category included
+  const { text, amount, date, category, mode, description } = req.body; // ✅ category included
   const transaction = new Transaction({
     text,
     amount,
     date,
     category, // default if not sent
+    mode,
+    description,
   });
 
   try {
@@ -57,10 +60,10 @@ router.delete("/:id", async (req, res) => {
 // PUT /api/transactions/:id
 router.put("/:id", async (req, res) => {
   try {
-    const { text, amount, category, date } = req.body; // ✅ include category
+    const { text, amount, category, date, mode, description } = req.body; // ✅ include category
     const updatedTransaction = await Transaction.findByIdAndUpdate(
       req.params.id,
-      { text, amount, category: category || "General", date: date || new Date() },
+      { text, amount, category: category || "General", date: date || new Date(), mode: mode || "debit", description},
       { new: true }
     );
     if (!updatedTransaction)
