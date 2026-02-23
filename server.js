@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const transactionsRouter = require("./routers/transactions"); // path to router
+const authRoutes = require("./routers/auth");
 require("dotenv").config();
 
 const app = express();
@@ -13,6 +14,7 @@ app.use(express.json());
 
 // Register router
 app.use("/api/transactions", transactionsRouter);
+app.use("/api/auth", authRoutes);
 
 const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/expense_tracker";
 
