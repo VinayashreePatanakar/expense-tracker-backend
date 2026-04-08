@@ -1,9 +1,12 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
-const transactionsRouter = require("./routers/transactions"); // path to router
-const authRoutes = require("./routers/auth");
-require("dotenv").config();
+import express from "express";
+import mongoose from "mongoose";
+import cors from "cors";
+import transactionsRouter from "./routers/transactions.js";
+import authRoutes from "./routers/auth.js";
+import usersRouter from "./routers/users.js";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -12,13 +15,14 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-// Register router
+// Routes
 app.use("/api/transactions", transactionsRouter);
 app.use("/api/auth", authRoutes);
+app.use("/api/users", usersRouter);
 
+// MongoDB connection
 const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/expense_tracker";
 
-// Connect to MongoDB
 mongoose
   .connect(MONGO_URI)
   .then(() => console.log("✅ MongoDB Connected"))

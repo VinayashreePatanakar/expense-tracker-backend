@@ -1,77 +1,65 @@
-const express = require("express");
+import express from "express";
+import Transaction from "../models/Transaction.js";
+import auth from "../middleware/auth.js";
+
 const router = express.Router();
-const Transaction = require("../models/Transaction");
 
-// GET all transactions (optionally filter by date)
-router.get("/", async (req, res) => {
+// GET all transactions for logged-in user
+router.get("/", auth, async (req, res) => {
   try {
-    const { date } = req.query;
-
-    if (date) {
-      const start = new Date(date);
-      const end = new Date(date);
-      end.setDate(end.getDate() + 1);
-
-      const transactions = await Transaction.find({
-        date: { $gte: start, $lt: end },
-      });
-      return res.json(transactions);
-    }
-
-    const transactions = await Transaction.find();
+    const transactions = await Transaction.find({ user: req.user.id });
     res.json(transactions);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// POST new transaction for logged-in user
+router.post("/", auth, async (req, res) => {
+  try {
+    const newTransaction = new Transaction({
+      ...req.body,
+      user: req.user.id,
+    });
+
+    const saved = await newTransaction.save();
+    res.json(saved);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// DELETE transaction (owner only)
+router.delete("/:id", auth, async (req, res) => {
+  try {
+    const transaction = await Transaction.findOneAndDelete({
+      _id: req.params.id,
+      user: req.user.id,
+    });
+
+    if (!transaction) return res.status(404).json({ message: "Not found" });
+
+    res.json({ message: "Deleted" });
   } catch (err) {
-    console.error(err); // <- This will show the real error
     res.status(500).json({ message: err.message });
   }
 });
 
-// POST a new transaction
-router.post("/", async (req, res) => {
-  const { text, amount, date, category, mode, description } = req.body; // ✅ category included
-  const transaction = new Transaction({
-    text,
-    amount,
-    date,
-    category, // default if not sent
-    mode,
-    description,
-  });
-
+// UPDATE transaction (owner only)
+router.put("/:id", auth, async (req, res) => {
   try {
-    const newTransaction = await transaction.save();
-    res.status(201).json(newTransaction);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
-
-// DELETE transaction by ID
-router.delete("/:id", async (req, res) => {
-  try {
-    const transaction = await Transaction.findByIdAndDelete(req.params.id);
-    if (!transaction) return res.status(404).json({ message: "Transaction not found" });
-    res.status(200).json({ message: "Transaction deleted" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// PUT /api/transactions/:id
-router.put("/:id", async (req, res) => {
-  try {
-    const { text, amount, category, date, mode, description } = req.body; // ✅ include category
-    const updatedTransaction = await Transaction.findByIdAndUpdate(
-      req.params.id,
-      { text, amount, category: category || "General", date: date || new Date(), mode: mode || "debit", description},
+    const transaction = await Transaction.findOneAndUpdate(
+      { _id: req.params.id, user: req.user.id },
+      req.body,
       { new: true }
     );
-    if (!updatedTransaction)
-      return res.status(404).json({ message: "Transaction not found" });
-    res.json(updatedTransaction);
+
+    if (!transaction) return res.status(404).json({ message: "Not found" });
+
+    res.json(transaction);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-module.exports = router;
+export default router;

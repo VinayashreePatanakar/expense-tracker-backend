@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const TransactionSchema = new mongoose.Schema({
   text: { type: String, required: true },
@@ -25,8 +25,15 @@ const TransactionSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
+
+  // ✅ ADD THIS
+  user: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "User",
+  required: true,
+},
 },
 { timestamps: true } // 🔥 ADD THIS
  );
 
-module.exports = mongoose.model("Transaction", TransactionSchema);
+export default mongoose.model("Transaction", TransactionSchema);
