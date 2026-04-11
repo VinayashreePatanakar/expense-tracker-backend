@@ -1,6 +1,7 @@
 {
   "name": "expense-tracker-backend",
   "version": "1.0.0",
+   "type": "module",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -20,7 +21,6 @@
     "jspdf-autotable": "^5.0.7",
     "mongoose": "^9.2.0",
     "uuid": "^13.0.0",
-    "xlsx": "^0.18.5",
-    "type": "module"
+    "xlsx": "^0.18.5"
   }
 }
