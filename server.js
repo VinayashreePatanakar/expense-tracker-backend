@@ -14,6 +14,7 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 const allowedOrigins = [
   "http://localhost:5173",
+  "http://localhost:5174",
   "https://expense-tracker-vinaya.netlify.app"
 ];
 
