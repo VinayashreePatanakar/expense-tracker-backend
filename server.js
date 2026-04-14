@@ -5,6 +5,7 @@ import transactionsRouter from "./routers/transactions.js";
 import authRoutes from "./routers/auth.js";
 import usersRouter from "./routers/users.js";
 import dotenv from "dotenv";
+import budgetsRouter from "./routers/budgets.js";
 
 dotenv.config();
 
@@ -35,6 +36,8 @@ app.use(express.json());
 app.use("/api/transactions", transactionsRouter);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", usersRouter);
+
+app.use("/api/budgets", budgetsRouter);
 
 // MongoDB connection
 const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/expense_tracker";
