@@ -62,6 +62,7 @@ router.put("/:id", verifyToken, upload.single("profilePic"), async (req, res) =>
     }
 
     console.log("BODY:", req.body); // 🔥 DEBUG
+    console.log("FILE:", req.file);
 
     const updatedData = {
       name: req.body.name,

@@ -6,6 +6,7 @@ import authRoutes from "./routers/auth.js";
 import usersRouter from "./routers/users.js";
 import dotenv from "dotenv";
 import budgetsRouter from "./routers/budgets.js";
+import fs from "fs";
 
 dotenv.config();
 
@@ -38,6 +39,12 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", usersRouter);
 
 app.use("/api/budgets", budgetsRouter);
+
+const uploadDir = "uploads";
+
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+}
 
 app.use("/uploads", express.static("uploads"));
 
