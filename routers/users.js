@@ -1,5 +1,6 @@
 import express from "express";
 import User from "../models/User.js";
+import upload from "../middleware/upload.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
@@ -26,25 +27,7 @@ router.get("/:id", verifyToken, async (req, res) => {
     if (!user) return res.status(404).json({ message: "User not found" });
     res.json(user);
   } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// UPDATE user
-router.put("/:id", verifyToken, async (req, res) => {
-  try {
-    if (req.user.id !== req.params.id) return res.status(403).json({ message: "Unauthorized" });
-
-    const { name, email } = req.body;
-    const updatedUser = await User.findByIdAndUpdate(
-      req.params.id,
-      { name, email },
-      { new: true, runValidators: true }
-    ).select("-password");
-
-    if (!updatedUser) return res.status(404).json({ message: "User not found" });
-    res.json(updatedUser);
-  } catch (err) {
+    console.error("UPDATE ERROR:", err); // 👈 ADD THIS
     res.status(500).json({ message: err.message });
   }
 });
@@ -67,8 +50,42 @@ router.put("/change-password/:id", verifyToken, async (req, res) => {
 
     res.json({ message: "Password updated successfully" });
   } catch (err) {
+    console.error("UPDATE ERROR:", err); // 👈 ADD THIS
     res.status(500).json({ message: err.message });
   }
 });
+
+router.put("/:id", verifyToken, upload.single("profilePic"), async (req, res) => {
+  try {
+    if (req.user.id !== req.params.id) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    console.log("BODY:", req.body); // 🔥 DEBUG
+
+    const updatedData = {
+      name: req.body.name,
+      email: req.body.email,
+      currency: req.body.currency,
+    };
+
+    if (req.file) {
+      updatedData.profilePic = `/uploads/${req.file.filename}`;
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      updatedData,
+      { new: true, runValidators: true }
+    ).select("-password");
+
+    res.status(200).json(user);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Update failed" });
+  }
+});
+
 
 export default router;

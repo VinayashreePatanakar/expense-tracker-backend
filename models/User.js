@@ -14,6 +14,22 @@
       type: String,
       required: true,
     },
+    currency: {
+      type: String,
+      default: "INR",
+    },
+    theme: {
+      type: String,
+      default: "light",
+    },
+    createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  profilePic: {
+  type: String,
+  default: "",
+  },
   }, { timestamps: true });
 
   export default mongoose.model("User", userSchema);

@@ -39,6 +39,8 @@ app.use("/api/users", usersRouter);
 
 app.use("/api/budgets", budgetsRouter);
 
+app.use("/uploads", express.static("uploads"));
+
 // MongoDB connection
 const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/expense_tracker";
 
