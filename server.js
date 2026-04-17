@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import transactionsRouter from "./routers/transactions.js";
 import authRoutes from "./routers/auth.js";
-import usersRouter from "./routers/users.js";
+import userRoutes from "./routers/users.js";
 import dotenv from "dotenv";
 import budgetsRouter from "./routers/budgets.js";
 import fs from "fs";
@@ -17,7 +17,7 @@ const PORT = process.env.PORT || 5000;
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
-  "https://expense-tracker-vinaya.netlify.app"
+  "jazzy-medovik-bc0f68.netlify.app"
 ];
 
 app.use(cors({
@@ -36,7 +36,7 @@ app.use(express.json());
 // Routes
 app.use("/api/transactions", transactionsRouter);
 app.use("/api/auth", authRoutes);
-app.use("/api/users", usersRouter);
+app.use("/api/users", userRoutes);
 
 app.use("/api/budgets", budgetsRouter);
 
