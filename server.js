@@ -17,7 +17,7 @@ const PORT = process.env.PORT || 5000;
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
-  "jazzy-medovik-bc0f68.netlify.app"
+  "https://jazzy-medovik-bc0f68.netlify.app"
 ];
 
 app.use(cors({
