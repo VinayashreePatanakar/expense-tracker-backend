@@ -33,24 +33,47 @@ router.get("/:id", verifyToken, async (req, res) => {
 });
 
 // CHANGE PASSWORD
-router.put("/change-password/:id", verifyToken, async (req, res) => {
+router.put("/change-password/:id", async (req, res) => {
   try {
-    if (req.user.id !== req.params.id) return res.status(403).json({ message: "Unauthorized" });
+    const { oldPassword, newPassword } = req.body;
 
-    const { currentPassword, newPassword } = req.body;
+    // ✅ check inputs
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ message: "All fields required" });
+    }
+
     const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ message: "User not found" });
 
-    const match = await bcrypt.compare(currentPassword, user.password);
-    if (!match) return res.status(400).json({ message: "Current password is incorrect" });
+    // ✅ check user exists
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
+    // 🔥 IMPORTANT FIX
+    if (!user.password) {
+      return res.status(500).json({ message: "User password missing in DB" });
+    }
+
+    console.log("oldPassword:", oldPassword);
+    console.log("user.password:", user.password);
+
+    // ✅ compare password
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+
+    if (!isMatch) {
+      return res.status(400).json({ message: "Old password incorrect" });
+    }
+
+    // ✅ hash new password
     const hashed = await bcrypt.hash(newPassword, 10);
+
     user.password = hashed;
     await user.save();
 
     res.json({ message: "Password updated successfully" });
+
   } catch (err) {
-    console.error("UPDATE ERROR:", err); // 👈 ADD THIS
+    console.log("CHANGE PASSWORD ERROR:", err);
     res.status(500).json({ message: err.message });
   }
 });
