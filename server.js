@@ -1,3 +1,4 @@
+import dns from "dns";
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -6,9 +7,11 @@ import authRoutes from "./routers/auth.js";
 import userRoutes from "./routers/users.js";
 import dotenv from "dotenv";
 import budgetsRouter from "./routers/budgets.js";
+import aiRouter from "./routers/ai.js";
 import fs from "fs";
 
 dotenv.config();
+dns.setServers(["172.20.10.1"]);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -49,8 +52,16 @@ if (!fs.existsSync(uploadDir)) {
 
 app.use("/uploads", express.static("uploads"));
 
+//for ai insights
+app.use("/api/ai", aiRouter);
+
 // MongoDB connection
 const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/expense_tracker";
+
+console.log(
+  "MongoDB connection:",
+  MONGO_URI.replace(/(mongodb\+srv:\/\/[^:]+:)[^@]+@/, "$1********@")
+);
 
 mongoose
   .connect(MONGO_URI)
