@@ -1,7 +1,17 @@
-const OLLAMA_URL = "http://localhost:11434/api/generate";
-const OLLAMA_MODEL = "llama3.2";
+import Groq from "groq-sdk";
+
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
+});
+
+const GROQ_MODEL =
+  process.env.GROQ_MODEL || "openai/gpt-oss-20b";
 
 export async function generateFinancialInsight(financialData) {
+  if (!process.env.GROQ_API_KEY) {
+    throw new Error("GROQ_API_KEY is missing");
+  }
+
   const prompt = `
 You are an AI financial assistant inside an expense tracking application.
 
@@ -44,27 +54,31 @@ Financial data:
 ${JSON.stringify(financialData, null, 2)}
 `;
 
-  const response = await fetch(OLLAMA_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: OLLAMA_MODEL,
-      prompt,
-      stream: false,
-    }),
+  const completion = await groq.chat.completions.create({
+    model: GROQ_MODEL,
+
+    messages: [
+      {
+        role: "system",
+        content:
+          "You are a precise financial analysis assistant. Follow the user's requested output format exactly.",
+      },
+      {
+        role: "user",
+        content: prompt,
+      },
+    ],
+
+    temperature: 0.2,
+    max_completion_tokens: 500,
   });
 
-  if (!response.ok) {
-    const errorText = await response.text();
+  const insight = completion.choices?.[0]?.message?.content;
 
-    throw new Error(
-      `Ollama API error: ${response.status} ${errorText}`
-    );
+  if (!insight) {
+    throw new Error("Groq returned an empty response");
   }
 
-  const data = await response.json();
-
-  return data.response;
+  return insight.trim();
 }
+
