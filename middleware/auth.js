@@ -14,9 +14,10 @@ const auth = (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded; // attach user ID
     next();
-  } catch (error) {
-    res.status(401).json({ message: "Invalid token" });
-  }
+  } catch (err) {
+  console.error("AUTH ERROR:", err.message);
+  res.status(401).json({ message: "Invalid or expired token" });
+}
 };
 
 export default auth;
