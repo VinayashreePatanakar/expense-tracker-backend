@@ -1,3 +1,4 @@
+import "dotenv/config";
 import dns from "dns";
 import express from "express";
 import mongoose from "mongoose";
