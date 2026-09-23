@@ -23,7 +23,13 @@ if (process.env.USE_PUBLIC_DNS === "true") {
 mongoose.set("bufferCommands", false);
 
 const app = express();
-app.use(helmet());
+app.use(
+  helmet({
+    crossOriginResourcePolicy: {
+      policy: "cross-origin",
+    },
+  })
+);
 
 const PORT = process.env.PORT || 5000;
 
@@ -82,13 +88,7 @@ if (process.env.NODE_ENV === "production" && !process.env.MONGO_URI) {
   throw new Error("MONGO_URI must be configured in production");
 }
 
-console.log(
-  "MongoDB connection:",
-  MONGO_URI.replace(
-    /(mongodb\+srv:\/\/[^:]+:)[^@]+@/,
-    "$1********@"
-  )
-);
+console.log("MongoDB connection configured:", Boolean(MONGO_URI));
 
 const startServer = async () => {
   try {
