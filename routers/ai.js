@@ -1,9 +1,10 @@
 import express from "express";
+import auth from "../middleware/auth.js";
 import { generateFinancialInsight } from "../services/aiService.js";
 
 const router = express.Router();
 
-router.post("/insights", async (req, res) => {
+router.post("/insights", auth, async (req, res) => {
   try {
     const financialData = req.body;
     console.log("🤖 AI request received");

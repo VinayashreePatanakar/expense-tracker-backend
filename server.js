@@ -1,4 +1,5 @@
 import "dotenv/config";
+import helmet from "helmet";
 import dns from "dns";
 import express from "express";
 import mongoose from "mongoose";
@@ -22,6 +23,8 @@ if (process.env.USE_PUBLIC_DNS === "true") {
 mongoose.set("bufferCommands", false);
 
 const app = express();
+app.use(helmet());
+
 const PORT = process.env.PORT || 5000;
 
 // ================= MIDDLEWARE =================
@@ -35,7 +38,7 @@ const allowedOrigins = [
 
 app.use(
   cors({
-    origin: (origin, callback) => {
+    origin: (origin, callback) => {                                                                                                                                                                                                                                                                                                                                                                                                       
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
