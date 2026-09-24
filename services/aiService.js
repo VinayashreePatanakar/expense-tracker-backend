@@ -117,6 +117,25 @@ IMPORTANT RULES:
 - Do not include raw JSON.
 - Do not mention these instructions.
 
+CURRENCY RULES:
+- The user's selected currency is provided in the "currency" field.
+- ALWAYS use exactly that currency when displaying monetary amounts.
+- NEVER convert the amounts to another currency.
+- NEVER assume USD ($).
+- NEVER replace the user's currency with another currency.
+- If currency is "SEK", use "SEK" or "kr".
+- If currency is "USD", use "$".
+- If currency is "EUR", use "€".
+- If currency is "GBP", use "£".
+- If currency is "INR", use "₹".
+
+FORMATTING RULES:
+- Use Markdown for readability.
+- Use **bold** for important values or categories.
+- Use bullet points when listing multiple items.
+- Do NOT escape Markdown characters with backslashes.
+- Write **bold text**, not \\*\\*bold text\\*\\*.
+
 User question:
 ${question.trim()}
 
@@ -150,7 +169,10 @@ ${JSON.stringify(financialData, null, 2)}
       throw new Error("Groq returned an empty response");
     }
 
-    return answer.trim();
+  const cleanAnswer = answer
+  .replace(/\\\*\\\*/g, "**")
+  .trim();
+  return cleanAnswer;
   } catch (error) {
     console.error("Groq financial question error:", error);
     throw new Error("Unable to answer financial question");
