@@ -136,6 +136,15 @@ FORMATTING RULES:
 - Do NOT escape Markdown characters with backslashes.
 - Write **bold text**, not \\*\\*bold text\\*\\*.
 
+MARKDOWN RULES:
+- Return normal Markdown.
+- Use **bold** for important values.
+- Use bullet points when useful.
+- NEVER escape Markdown characters.
+- NEVER write \\*\\*text\\*\\*.
+- Write **text** instead.
+- Do not put backslashes before * characters.
+
 User question:
 ${question.trim()}
 
@@ -171,6 +180,7 @@ ${JSON.stringify(financialData, null, 2)}
 
   const cleanAnswer = answer
   .replace(/\\\*\\\*/g, "**")
+  .replace(/\\_/g, "_")
   .trim();
   return cleanAnswer;
   } catch (error) {
