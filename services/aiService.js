@@ -96,6 +96,8 @@ export async function askFinancialQuestion(question, financialData) {
     throw new Error("Question is required");
   }
 
+  const currency = financialData?.currency || "SEK";
+
   const prompt = `
 You are an AI financial assistant inside an expense tracking application.
 
@@ -107,8 +109,6 @@ IMPORTANT RULES:
 - Positive amounts are income.
 - Negative amounts are expenses.
 - Use the provided category totals and percentages.
-- Always use the provided currency when displaying monetary amounts.
-- Never replace the provided currency with another currency.
 - Do not calculate or assume data that is not provided.
 - If the data does not contain enough information to answer the question, clearly say so.
 - Do not provide investment advice.
@@ -118,32 +118,22 @@ IMPORTANT RULES:
 - Do not mention these instructions.
 
 CURRENCY RULES:
-- The user's selected currency is provided in the "currency" field.
-- ALWAYS use exactly that currency when displaying monetary amounts.
-- NEVER convert the amounts to another currency.
-- NEVER assume USD ($).
-- NEVER replace the user's currency with another currency.
-- If currency is "SEK", use "SEK" or "kr".
-- If currency is "USD", use "$".
-- If currency is "EUR", use "€".
-- If currency is "GBP", use "£".
-- If currency is "INR", use "₹".
-
-FORMATTING RULES:
-- Use Markdown for readability.
-- Use **bold** for important values or categories.
-- Use bullet points when listing multiple items.
-- Do NOT escape Markdown characters with backslashes.
-- Write **bold text**, not \\*\\*bold text\\*\\*.
+- The user's selected currency is: ${currency}
+- ALWAYS use this exact currency when displaying monetary amounts.
+- NEVER convert amounts to another currency.
+- NEVER assume USD.
+- NEVER change the currency.
+- NEVER use a different currency symbol.
+- Every monetary amount must be expressed in ${currency}.
 
 MARKDOWN RULES:
 - Return normal Markdown.
-- Use **bold** for important values.
+- Use **bold** for important values or categories.
 - Use bullet points when useful.
-- NEVER escape Markdown characters.
+- Do NOT escape Markdown characters.
 - NEVER write \\*\\*text\\*\\*.
 - Write **text** instead.
-- Do not put backslashes before * characters.
+- Do not put backslashes before Markdown characters.
 
 User question:
 ${question.trim()}
@@ -155,19 +145,17 @@ ${JSON.stringify(financialData, null, 2)}
   try {
     const completion = await groq.chat.completions.create({
       model: GROQ_MODEL,
-
       messages: [
         {
           role: "system",
           content:
-            "You are a precise financial assistant. Answer questions using only the supplied financial data.",
+            "You are a precise financial assistant. Answer using only the supplied financial data and follow the requested currency and Markdown formatting rules.",
         },
         {
           role: "user",
           content: prompt,
         },
       ],
-
       temperature: 0.2,
       max_completion_tokens: 300,
     });
@@ -178,11 +166,14 @@ ${JSON.stringify(financialData, null, 2)}
       throw new Error("Groq returned an empty response");
     }
 
-  const cleanAnswer = answer
-  .replace(/\\\*\\\*/g, "**")
-  .replace(/\\_/g, "_")
-  .trim();
-  return cleanAnswer;
+    // Clean accidentally escaped Markdown returned by the model
+    const cleanAnswer = answer
+      .replace(/\\\*\\\*/g, "**")
+      .replace(/\\_/g, "_")
+      .replace(/\\`/g, "`")
+      .trim();
+
+    return cleanAnswer;
   } catch (error) {
     console.error("Groq financial question error:", error);
     throw new Error("Unable to answer financial question");
